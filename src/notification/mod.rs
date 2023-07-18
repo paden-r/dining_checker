@@ -14,12 +14,7 @@ pub(crate) async fn send_email_smtp(
     let smtp_server = env::var("DINING_SMTP_SERVER").expect("DINING_SMTP_SERVER not set");
     let smtp_username = env::var("DINING_SMTP_USERNAME").expect("DINING_SMTP_USERNAME not set");
     let smtp_password = env::var("DINING_SMTP_PASSWORD").expect("DINING_SMTP_PASSWORD not set");
-    // let smtp_port = env::var("DINING_SMTP_PORT").expect("DINING_SMTP_PORT");
-    // let to_address = "hello@example.com";
-    // let smtp_server = "smtp.googlemail.com";
-    // let smtp_username = "exampleaccount@gmail";
-    // let smtp_password = "hunter2";
-    // let smtp_port = 587u16;
+    let smtp_port = env::var("DINING_SMTP_PORT").expect("DINING_SMTP_PORT");
 
     let email = Message::builder()
         .from(smtp_username.parse().unwrap())
@@ -34,7 +29,7 @@ pub(crate) async fn send_email_smtp(
     let mailer: AsyncSmtpTransport<Tokio1Executor> =
         AsyncSmtpTransport::<Tokio1Executor>::relay(smtp_server.as_str())
             .unwrap()
-            .port(465u16)
+            .port(smtp_port.parse().unwrap())
             .credentials(creds)
             .build();
 
