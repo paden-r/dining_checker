@@ -3,18 +3,20 @@ use serde::Deserialize;
 use std::env;
 use reqwest;
 use reqwest::header::USER_AGENT;
+use crate::notification::send_email_smtp;
 use crate::constants::*;
 
 mod constants;
+mod notification;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct Offer {
     datetime: String,
     time: String,
     url: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 struct APIResponse {
     error: Option<String>,
 
@@ -48,7 +50,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             match response.status() {
                 reqwest::StatusCode::OK => {
                     match response.json::<APIResponse>().await {
-                        Ok(parsed) => println!("{:?}", parsed),
+                        Ok(parsed) => {
+                            println!("{:?}", parsed.clone());
+                            send_email_smtp(format!("{:?}", parsed).as_str()).await.expect("Error sending email");
+                        },
                         Err(_) => println!("An error occurred while parsing")
                     };
                 }

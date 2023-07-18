@@ -1,29 +1,42 @@
-use lettre::email::EmailBuilder;
-use lettre::transport::smtp::{SecurityLevel, SmtpTransportBuilder};
+use std::env;
 
+use lettre::{
+    AsyncSmtpTransport, AsyncTransport, Message,
+    message::header::ContentType, Tokio1Executor, transport::smtp::authentication::Credentials,
+};
+use lettre::transport::smtp::Error;
+use lettre::transport::smtp::response::Response;
 
-async fn send_email_smtp(
+pub(crate) async fn send_email_smtp(
     body: &str
-) -> Result<(), Box<dyn std::error::Error>> {
-    let to_address = "hello@example.com";
-    let smtp_server = "smtp.googlemail.com";
-    let smtp_username = "exampleaccount@gmail";
-    let smtp_password = "hunter2";
-    let smtp_port = 587u16;
+) -> Result<Response, Error> {
+    let to_address = env::var("DINING_ALERT_EMAIL").expect("DINING_ALERT_EMAIL not set");
+    let smtp_server = env::var("DINING_SMTP_SERVER").expect("DINING_SMTP_SERVER not set");
+    let smtp_username = env::var("DINING_SMTP_USERNAME").expect("DINING_SMTP_USERNAME not set");
+    let smtp_password = env::var("DINING_SMTP_PASSWORD").expect("DINING_SMTP_PASSWORD not set");
+    // let smtp_port = env::var("DINING_SMTP_PORT").expect("DINING_SMTP_PORT");
+    // let to_address = "hello@example.com";
+    // let smtp_server = "smtp.googlemail.com";
+    // let smtp_username = "exampleaccount@gmail";
+    // let smtp_password = "hunter2";
+    // let smtp_port = 587u16;
 
-    let email = EmailBuilder::new()
-        .to(to_address)
-        .from(smtp_username)
-        .subject("I am contacting you in respect of a family treasure of Gold deposited in my name")
-        .body("i am Becki Ofori a Ghanian from Ashanti region Kumasi, Ghana.")
-        .build().unwrap();
+    let email = Message::builder()
+        .from(smtp_username.parse().unwrap())
+        .to(to_address.parse().unwrap())
+        .subject("Dining Alert: Reservation found!")
+        .header(ContentType::TEXT_PLAIN)
+        .body(String::from(body))
+        .unwrap();
 
-    let mut mailer = SmtpTransportBuilder::new((smtp_server, smtp_port)).unwrap()
-        .hello_name("localhost")
-        .credentials(smtp_username, smtp_password)
-        .security_level(SecurityLevel::AlwaysEncrypt)
-        .smtp_utf8(true)
-        .build();
+    let creds = Credentials::new(smtp_username.to_owned(), smtp_password.to_owned());
 
-    mailer.send(email.clone())
+    let mailer: AsyncSmtpTransport<Tokio1Executor> =
+        AsyncSmtpTransport::<Tokio1Executor>::relay(smtp_server.as_str())
+            .unwrap()
+            .port(465u16)
+            .credentials(creds)
+            .build();
+
+    mailer.send(email).await
 }
