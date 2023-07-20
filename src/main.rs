@@ -1,6 +1,7 @@
-use clap::{crate_authors, crate_description, crate_name, crate_version, Command};
+use clap::{crate_authors, crate_description, crate_name, crate_version, Command, Arg};
 use serde::{Deserialize, Serialize};
 use std::env;
+use std::io::Write;
 use reqwest;
 use reqwest::header::USER_AGENT;
 use log::{debug, info, error, LevelFilter};
@@ -64,6 +65,10 @@ fn build_email_body(offers: Vec<Offer>) -> String {
     tera.render("email.txt", &context).unwrap()
 }
 
+fn build_url(party_size: &String, date: &String) -> String {
+    format!("{}/{}/{}/{}/{}", DISNEY_ROOT_URL, SPACE_220_LOUNGE_URL, party_size, date, LUNCH_MEAL_PERIOD)
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     setup_logger();
@@ -74,15 +79,41 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .subcommand(
             Command::new("check")
                 .about("Checks for dining reservation availability.")
+                .arg(Arg::new("party_size"))
+                .arg(Arg::new("reservation_date"))
         );
 
     let m = cmd.get_matches_mut();
 
     match m.subcommand() {
-        Some(("check", _sub_m)) => {
+        Some(("check", sub_m)) => {
+            let party_size = match sub_m.get_one::<String>("party_size") {
+                Some(party_) => party_.to_string(),
+                None => {
+                    print!("Party size: ");
+                    std::io::stdout().flush().unwrap();
+                    let mut party_ = String::new();
+                    std::io::stdin().read_line(&mut party_).unwrap();
+
+                    party_.to_string()
+                }
+            };
+            let date = match sub_m.get_one::<String>("reservation_date") {
+                Some(date_) => date_.to_string(),
+                None => {
+                    print!("reservation date: ");
+                    std::io::stdout().flush().unwrap();
+                    let mut date_ = String::new();
+                    std::io::stdin().read_line(&mut date_).unwrap();
+
+                    date_.to_string()
+                }
+            };
+            let request_url = build_url(&party_size, &date);
+            debug!("Constructed URL: {}", request_url.clone());
             let http_client = reqwest::Client::new();
             let response = http_client
-                .get(SPACE_URL.as_str())
+                .get(request_url.as_str())
                 .header(USER_AGENT, VALID_USER_AGENT)
                 .send()
                 .await
