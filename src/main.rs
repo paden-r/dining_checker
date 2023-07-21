@@ -138,7 +138,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     };
                 }
                 other => {
-                    panic!("Uh oh! Something unexpected happened: {:?}", other);
+                    error!("Uh oh! Something unexpected happened: {:?}", other);
                 }
             };
         }
