@@ -5,3 +5,4 @@ pub const BE_OUR_GUEST_URL: &str = "finder/api/v1/explorer-service/dining-availa
 pub const BOMA_URL: &str = "finder/api/v1/explorer-service/dining-availability/%7B9DDDAEF3-9DAC-46B6-B55B-A12FC04588DF%7D/wdw/90001320;entityType=restaurant/table-service";
 pub const LUNCH_MEAL_PERIOD: &str = "?mealPeriod=80000717";
 pub const DINNER_MEAL_PERIOD: &str = "?mealPeriod=80000714";
+pub const SHIKI_SAI_URL: &str = "finder/api/v1/explorer-service/dining-availability/%7B9DDDAEF3-9DAC-46B6-B55B-A12FC04588DF%7D/wdw/221626;entityType=restaurant/table-service";

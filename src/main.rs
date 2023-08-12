@@ -67,7 +67,7 @@ fn build_email_body(offers: Vec<Offer>) -> String {
 }
 
 fn build_url(search_parameters: CLIParameters) -> String {
-    format!("{}/{}/{}/{}/{}", DISNEY_ROOT_URL, SPACE_220_LOUNGE_URL, search_parameters.party_size, search_parameters.reservation_date, LUNCH_MEAL_PERIOD)
+    format!("{}/{}/{}/{}/{}", DISNEY_ROOT_URL, SHIKI_SAI_URL, search_parameters.party_size, search_parameters.reservation_date, DINNER_MEAL_PERIOD)
 }
 
 #[tokio::main]

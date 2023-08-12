@@ -26,12 +26,12 @@ pub fn get_cli_arguments() -> Result<CLIParameters, &'static str> {
             Command::new("check")
                 .about("Checks for dining reservation availability.")
                 .arg(Arg::new("party_size")
-                    .value_parser(clap::value_parser!(u16).range(15..))
+                    // .value_parser(clap::value_parser!(u16).range(1..8))
                     .required(true)
                     .help("number of people in your party"))
                 .arg(Arg::new("reservation_date").help("date format: YYYY-MM-DD"))
-                .arg(Arg::new("restaurant")
-                    .value_parser(clap::builder::EnumValueParser::<Restaurants>::new()))
+                // .arg(Arg::new("restaurant")
+                //     .value_parser(clap::builder::EnumValueParser::<Restaurants>::new()))
         );
 
     let m = cmd.get_matches_mut();
